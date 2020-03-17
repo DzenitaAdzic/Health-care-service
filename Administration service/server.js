@@ -4,13 +4,15 @@ const mySqlConnection = require("./connection");
 const TeamRoutes = require("./routes/team");
 const EmployeeRoutes = require("./routes/employee");
 const TeamEmployee = require("./routes/team_employee");
+const message_broker = require("./message broker/send");
 
+const port = 3000;
 var app = express();
 
 app.use(bodyParser.json());
 app.use("/team", TeamRoutes);
 app.use("/employee", EmployeeRoutes);
-app.use("/members", TeamEmployee);
+app.use("/teams", TeamEmployee);
 
-app.listen(3000);
+app.listen(port, () => console.log(`Administrative service listening on port ${port}`));
  

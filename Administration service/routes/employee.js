@@ -1,18 +1,17 @@
 const express = require("express");
 const Router = express.Router();
 const mysqlConnection = require("../connection");
+var msgBroker = require("../message broker/send");
 
 Router.get("/", (req, res)=>{
     mysqlConnection.query("SELECT * from employee", (err, rows, fields) => {
-        if(!err)
-        {
+        if(!err)       {
             res.send(rows);
         }
-        else
-        {
+        else {
             console.log(err);
         }
-    })
+    });
 });
 
 Router.get('/:id', function(req, res, next) {
@@ -26,8 +25,6 @@ Router.get('/:id', function(req, res, next) {
     });
   });
 
-  /*post method for create employee*/
-  
 Router.post('/create', function(req, res, next) {
     var name = req.body.name;
     var lastname = req.body.lastname;
@@ -38,7 +35,12 @@ Router.post('/create', function(req, res, next) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
       }
-      res.json({'status': 'success', id: result.insertId})
+      res.json({'status': 'success', id: result.insertId});
+      msgBroker.send_message("EMPLOYEE UPDATE", { id : `${result.insertId}`, 
+                                name : `${name}`, 
+                                lastname : `${lastname}`,
+                                title : `${title}` });
+
     });
   });
 
@@ -54,8 +56,12 @@ Router.put('/update/:id', function(req, res, next) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
       }
-      res.json({'status': 'success'})
-    })
+      res.json({'status': 'success'});
+      msgBroker.send_message("EMPLOYEE UPDATE", { id : `${id}`, 
+                                name : `${name}`, 
+                                lastname : `${lastname}`,
+                                title : `${title}` });
+    });
   });
   
   /*delete method for delete employee*/
@@ -66,7 +72,8 @@ Router.put('/update/:id', function(req, res, next) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
       }
-      res.json({'status': 'success'})
+      res.json({'status': 'success'});
+      msgBroker.send_message("EMPLOYEE DELETE", { id : `${id}`});
     })
   })
 

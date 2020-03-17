@@ -1,9 +1,10 @@
 const express = require("express");
 const Router = express.Router();
 const mysqlConnection = require("../connection");
+var msgBroker = require("../message broker/send");
 
 Router.get("/", (req, res)=>{
-    mysqlConnection.query("SELECT * from team_employee", (err, rows, fields) => {
+    mysqlConnection.query("SELECT team_id ,GROUP_CONCAT(employee_id SEPARATOR ' ') members FROM team_employee GROUP BY team_id", (err, rows, fields) => {
         if(!err)
         {
             res.send(rows);
@@ -15,10 +16,10 @@ Router.get("/", (req, res)=>{
     })
 });
 
-Router.get('/team/:id/members', function(req, res, next) {
+Router.get('/:id/members', function(req, res, next) {
     var id = req.params.id;
     
-    var sql = `SELECT id, name, lastname, title from employee inner join team_employee on employee.id = team_employee.employee_id where team_employee.team_id = ${id}`;
+    var sql = `SELECT employee_id from team_employee where team_id = ${id}`;
     mysqlConnection.query(sql, function(err, row, fields) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
@@ -27,8 +28,7 @@ Router.get('/team/:id/members', function(req, res, next) {
     });
   });
 
-  /*post method for create team member*/
-  
+  /*post method for create team member*/ 
 Router.post('/create', function(req, res, next) {
     var team_id = req.body.team_id;
     var employee_id = req.body.employee_id;
@@ -38,7 +38,9 @@ Router.post('/create', function(req, res, next) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
       }
-      res.json({'status': 'success'})
+      res.json({'status': 'success'});
+      msgBroker.send_message("TEAMEMPLOYEE UPDATE", { teamId : `${team_id}`, employeeId : `${employee_id}`});
+   
     });
   });
 
@@ -52,9 +54,10 @@ Router.post('/create', function(req, res, next) {
       if(err) {
         res.status(500).send({ error: 'Something failed!' })
       }
-      res.json({'status': 'success'})
-    })
-  })
+      res.json({'status': 'success'});
+      msgBroker.send_message("TEAMEMPLOYEE DELETE", { teamId : `${team_id}`, employeeId : `${employee_id}`});
+    });
+  });
 
 module.exports = Router;
 
