@@ -65,8 +65,8 @@ function getTeamIdKeys(ids){
   function getTeamsWithMembers() {
     return new Promise ((resolve, reject) =>{
       client.keys("Team:*:members", (err, keys) => {
-        if(err) {
-          reject(err);        
+        if(keys.length == 0) {
+          reject("No teams entered");        
         }
         else {
           resolve(keys);
@@ -101,13 +101,18 @@ function getTeamIdKeys(ids){
   function getTeams() {
    
     return new Promise((resolve, reject) =>{
-                getTeamsWithMembers().then((keys) => {
-                  getTeamMembersId(keys).then((ids) => {
-                    getMembers(ids).then((result) => {
+                getTeamsWithMembers()
+                .then((keys) => {
+                  return getTeamMembersId(keys) })
+                .then((ids) => {
+                    return getMembers(ids) })
+                .then((result) => {
                       resolve(result);
-                    });
-                  });
-                });       
+                    })  
+                .catch(function(err){
+                  reject(err);
+              });
+               
             });
   }
 

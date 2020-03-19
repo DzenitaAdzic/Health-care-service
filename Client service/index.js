@@ -7,7 +7,7 @@ var readDb = require('./db/read_db');
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-var teams = undefined;
+
 
 
 //write2database.write();
@@ -15,9 +15,12 @@ var teams = undefined;
 
 app.get('/teams/', (req, res, next) => {
  
-    readDb.getTeams().then((result) => {
-      res.send(result);
-  });
+    readDb.getTeams()
+    .then((result) => {
+      res.send(result); })
+    .catch(function(err){
+        res.send(err)
+    });
 
 });
 
