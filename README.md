@@ -7,9 +7,9 @@ Import it in MySql workbench.
 
 Start application in two terminals.
 
-Open Administration service, and run npm server.js
+Open Administration service, and run node server.js
 
-Open Client service and run npm index.js
+Open Client service and run node index.js
 
 
 
